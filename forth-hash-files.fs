@@ -101,13 +101,14 @@ create current-key 256 chars allot  0 value current-key-len
 
 privatize
 
-: test  ( -- )  \ {{{
-    s" gustav1" 2dup file-status nip 0<>  if  2dup 8 make-hash-file  then
-    open-hash-file
-    s" key-one" with-hf-key  if  hf@  else  0  then  10 + hf! hf@ .
-    s" key-two" with-hf-key  if  hf@  dup 3 >=  if  drop -1  then  else  0  then  1 + hf! hf@ .
-    close-hash-file  ;
-
-test
-.s
+\ : test  ( -- )  \ {{{
+\     s" gustav1" 2dup file-status nip 0<>  if  2dup 8 make-hash-file  then
+\     open-hash-file
+\     s" key-one" with-hf-key  if  hf@  else  0  then  10 + hf! hf@ .
+\     s" key-two" with-hf-key  if  hf@  dup 3 >=  if  drop -1  then  else  0  then  1 + hf! hf@ .
+\     close-hash-file  ;
+\ 
+\ test
+\ .s
 \ }}}
+
