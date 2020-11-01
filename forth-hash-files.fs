@@ -41,8 +41,7 @@ create current-key 256 chars allot  0 value current-key-len
 : (find-key-cons-faddr)  ( flist in-loop? -- faddr )
     if  r> drop  then
     ?dup 0=  if  0  else
-        dup >r fcar@ fcar@ dup fcar@ to bufferlen  fcdr@ file>
-        buffer bufferlen fid read-file s" (find-key-cons-faddr) error1" gthrow
+        dup >r fcar@ fcar@ file@ dup to bufferlen  buffer swap fid read-file s" (find-key-cons-faddr) error1" gthrow
         bufferlen <> s" (find-key-cons-faddr) error2" gthrow
         current-key current-key-len buffer bufferlen compare 0=  if  r> fcar@  else  r> fcdr@ true recurse  then
     then  ;
@@ -88,14 +87,15 @@ create current-key 256 chars allot  0 value current-key-len
     2dup dup to current-key-len current-key swap cmove
     str>hash 1+ cells dup to hash-faddr file@ find-key-cons-faddr dup to kv-faddr 0<>  ;
 : hf-item!  ( addr u -- faddr )  \ write arbitrary number (u) of bytes, starting at addr, to the ht-file
-    fid file-size s" hf-item! error1" gthrow d>s dup >r file>  fid write-file s" hf-item! error2" gthrow  r>  ;
+    \ first write a cell, storing u
+    fid file-size s" hf-item! error1" gthrow d>s >r dup r@ file!  fid write-file s" hf-item! error2" gthrow  r>  ;
 : hf-item-len  ( faddr -- u )  file@  ;
-: hf-item@  ( faddr addr u -- )
-    dup >r rot file> fid read-file s" hf-item@ error1" gthrow  r> <> s" hf-item@ error2" gthrow  ;
+: hf-item@  ( faddr addr u -- u' )
+    rot file@ swap min dup >r  fid read-file s" hf-item@ error1" gthrow  r@ <> s" hf-item@ error2" gthrow  r>  ;
 : hf!  ( item -- )
     kv-faddr 0=  if
         fcons to kv-faddr  fcons >r  kv-faddr r@ fcar!  hash-faddr file@ r@ fcdr!  r> hash-faddr file!
-        current-key current-key-len hf-item!  fcons dup >r fcdr!  current-key-len r@ fcar!  r> kv-faddr fcar!
+        current-key current-key-len hf-item! kv-faddr fcar!
     then  kv-faddr fcdr!  ;
 : hf@  ( -- item )  kv-faddr dup 0<> swap fcdr@ and  ;
 
@@ -106,6 +106,7 @@ privatize
 \     open-hash-file
 \     s" key-one" with-hf-key  if  hf@  else  0  then  10 + hf! hf@ .
 \     s" key-two" with-hf-key  if  hf@  dup 3 >=  if  drop -1  then  else  0  then  1 + hf! hf@ .
+\     s" key-three" with-hf-key .  s" gustav" hf-item! hf!  hf@ pad 10 hf-item@ cr pad swap type ." ;" cr
 \     close-hash-file  ;
 \ 
 \ test
