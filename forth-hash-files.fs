@@ -81,7 +81,7 @@ create current-key 256 chars allot  0 value current-key-len
 : create-hf-vial  ( -- addr )  2 cells allocate s" create-hf-vial error1" gthrow  ;
 : free-hf-vial  ( addr -- )  free s" free-hf-vial error1" gthrow  ;
 : suspend-hash-file  ( addr -- )  >r fid r@ !  hash-size r> cell+ !  ;
-: resume-hash-file  ( addr -- )  dup >r @ fid !  r> cell+ hash-size !  ;
+: resume-hash-file  ( addr -- )  dup >r @ to fid  r> cell+ @ to hash-size  ;
 
 : with-hf-key  ( addr u -- exists? )
     2dup dup to current-key-len current-key swap cmove
@@ -91,7 +91,7 @@ create current-key 256 chars allot  0 value current-key-len
     fid file-size s" hf-item! error1" gthrow d>s >r dup r@ file!  fid write-file s" hf-item! error2" gthrow  r>  ;
 : hf-item-len  ( faddr -- u )  file@  ;
 : hf-item@  ( faddr addr u -- u' )
-    rot file@ swap min dup >r  fid read-file s" hf-item@ error1" gthrow  r@ <> s" hf-item@ error2" gthrow  r>  ;
+    rot file@ min dup >r  fid read-file s" hf-item@ error1" gthrow  r@ <> s" hf-item@ error2" gthrow  r>  ;
 : hf!  ( item -- )
     kv-faddr 0=  if
         fcons to kv-faddr  fcons >r  kv-faddr r@ fcar!  hash-faddr file@ r@ fcdr!  r> hash-faddr file!
@@ -109,7 +109,6 @@ privatize
 \     s" key-three" with-hf-key .  s" gustav" hf-item! hf!  hf@ pad 10 hf-item@ cr pad swap type ." ;" cr
 \     close-hash-file  ;
 \ 
-\ test
-\ .s
+\ test .s
 \ }}}
 
